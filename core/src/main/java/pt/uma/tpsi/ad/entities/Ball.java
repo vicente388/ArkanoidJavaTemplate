@@ -24,7 +24,7 @@ public class Ball {
         this.angle =0;
 
     }
-
+    // TEste
     public void create() {
         animator.create();
         posX = (Gdx.graphics.getWidth()/2) - this.animator.getWidth()/2;
