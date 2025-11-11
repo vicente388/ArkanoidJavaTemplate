@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class NormalBrick extends Brick {
 
     public NormalBrick(SpriteBatch batch, int x, int y) {
-        // Passa para a superclasse o batch, o sprite e a posição
-        super(batch, "yellow.png", x, y);
+        // Usar yellow.png como spritesheet (assumido 4 colunas x 1 linha)
+        super(batch, "yellow.png", 2, 1, x, y);
     }
 
     @Override

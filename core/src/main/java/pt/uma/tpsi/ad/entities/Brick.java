@@ -16,21 +16,15 @@ public abstract class Brick {
     private static int standardHeight = 0;
 
     // Scale factor to render bricks smaller than the source image (pode ser ajustado)
-    public static float SCALE = 0.6f;
-
-    // constructor que aceita cols/rows
-    public Brick(SpriteBatch batch, String spritePath, int cols, int rows, int x, int y){
-        this.animator = new Animator(batch, spritePath, cols, rows);
-        this(batch, spritePath, 1, 1, x, y);
-    }
-
-    // novo constructor que permite especificar cols/rows do sprite sheet
+    // Ajustado para 0.45 para reduzir o tamanho e permitir 20 colunas alinhadas
+    public static float SCALE = 1f;
 
     // constructor antigo (compatibilidade) assume 1x1
     public Brick(SpriteBatch batch, String spritePath, int x, int y){
         this(batch, spritePath, 1, 1, x, y);
     }
 
+    // novo constructor que permite especificar cols/rows do sprite sheet
     public Brick(SpriteBatch batch, String spritePath, int cols, int rows, int x, int y){
         this.animator = new Animator(batch, spritePath, cols, rows);
         this.posX = x;
@@ -39,7 +33,7 @@ public abstract class Brick {
     }
     public void create() {
         animator.create();
-        // define standard size the first time a brick is created
+        // define standard size the primeira vez que um brick é criado
         if (standardWidth == 0 || standardHeight == 0) {
             // aplica escala para reduzir tamanho visual dos bricks
             standardWidth = Math.max(1, Math.round(animator.getWidth() * SCALE));
@@ -51,8 +45,13 @@ public abstract class Brick {
     }
 
     public void render() {
-        // render scaled to the shared standard size so all bricks appear the same
+        // desenhar animação em loop desde o início do jogo
         animator.render(posX, posY, standardWidth, standardHeight);
+    }
+
+    // helper para subclasses desenharem um frame fixo (mantém tamanho standard)
+    protected void renderFrame(int frameIndex) {
+        animator.renderFrame(posX, posY, standardWidth, standardHeight, frameIndex);
     }
 
     public boolean isCollided() {
@@ -64,4 +63,13 @@ public abstract class Brick {
     }
 
     public abstract void onCollision();
+
+    // --- helpers para normalizar tamanho entre diferentes spritesheets ---
+    public static void setStandardSize(int w, int h) {
+        standardWidth = Math.max(1, w);
+        standardHeight = Math.max(1, h);
+    }
+
+    public static int getStandardWidth() { return standardWidth; }
+    public static int getStandardHeight() { return standardHeight; }
 }

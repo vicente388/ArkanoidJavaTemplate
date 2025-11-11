@@ -7,8 +7,8 @@ public class StrongBrick extends Brick {
     private int lives = 2;
 
     public StrongBrick(SpriteBatch batch, int x, int y) {
-        // sprite animado com 6 frames
-        super(batch, "red.png", 6, 1, x, y);
+        // usa constructor que permite indicar o spritesheet (assumido 4 colunas x 1 linha)
+        super(batch, "red.png", 2, 1, x, y);
     }
 
     @Override
@@ -22,9 +22,9 @@ public class StrongBrick extends Brick {
 
     @Override
     public void render() {
-        // se metade partido (uma vida a menos) mostrar frame fixo 1, senão animar
+        // se quiseres mostrar um sprite partido podes usar renderFrame(1)
         if (lives == 1) {
-            animator.renderFrame(posX, posY, standardWidth, standardHeight, 1);
+            renderFrame(1);
         } else {
             super.render();
         }
