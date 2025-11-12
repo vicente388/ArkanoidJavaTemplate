@@ -12,7 +12,7 @@ public class Ball {
     private int directionX;
     private int directionY;
     private double angle;
-    private int speedX = 7; // aumenta para a bola ficar mais rápida horizontalmente
+    private int speedX = 6; // aumenta para a bola ficar mais rápida horizontalmente
     private int speedY = 5;
 
 
@@ -21,7 +21,7 @@ public class Ball {
         animator = new Animator(batch, "ball.png", 2, 2);
         this.directionX =1;
         this.directionY =1;
-        this.angle =0;
+        this.angle =0.5;
 
     }
 
@@ -30,6 +30,8 @@ public class Ball {
         posX = (Gdx.graphics.getWidth()/2) - this.animator.getWidth()/2;
         posY = (Gdx.graphics.getHeight()/2);
         boundingBox = new Rectangle(posX, posY, animator.getWidth(), animator.getHeight());
+
+
 
     }
 
@@ -80,32 +82,11 @@ public class Ball {
     }
 
     // Ajusta a direção horizontal dependendo do ponto de contacto no rect (paddle ou brick)
-    // Versão simples: calcula um offset normalizado (-1 = totalmente à esquerda, +1 = totalmente à direita)
-    // e define directionX e speedX proporcionalmente. Não usa vetores.
     public void adjustDirectionOnContact(Rectangle rect) {
-        // centro da bola em X
-        float ballCenterX = posX + animator.getWidth() / 2f;
-        // posição relativa dentro do rect (0.0 = esquerda, 1.0 = direita)
-        float relative = (ballCenterX - rect.x) / rect.width;
-        // normaliza para -1 .. 1 (centro = 0)
-        float offset = (relative - 0.5f) * 2f;
-
-        // limiar para considerar como "centro" (sem desvio horizontal)
-        float deadZone = 0.20f; // 20% ao centro
-        if (Math.abs(offset) <= deadZone) {
-            directionX = 0;
-            speedX = 0; // movimento vertical
-            return;
-        }
-
-        // define a direção (sinal do offset)
-        directionX = offset > 0 ? 1 : -1;
-
-        // velocidade horizontal proporcional à distância do centro (mínimo 1, máximo 6)
-        int max = 6;
-        int min = 1;
-        int calculated = Math.round((Math.abs(offset) - deadZone) / (1f - deadZone) * max);
-        speedX = Math.max(min, Math.min(max, calculated));
+        // Simples reflexão: inverte apenas a componente Y da direção.
+        // Não alteramos a componente X (ou velocidade X) aqui — isto evita lógica de
+        // zonas esquerda/meio/direita da pá.
+        reverseYDirection();
     }
 
 }

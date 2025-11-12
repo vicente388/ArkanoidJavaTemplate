@@ -50,9 +50,10 @@ public class Game extends ApplicationAdapter {
         brickGrid.render();
 
         if (ball.getBoundingBox().overlaps(player.getBoundingBox())) {
-            // ajusta direção horizontal consoante o ponto de contacto com o paddle
+            // comportamento simples: a bola reflete verticalmente sem lógica de zonas
             ball.adjustDirectionOnContact(player.getBoundingBox());
-            ball.reverseYDirection(); // faz a bola “saltar” para cima
+            // empurra a bola para fora do paddle para evitar múltiplas deteções seguidas
+            ball.resolveCollisionWith(player.getBoundingBox());
         }
 
         // Se o jogo ainda não acabou, verifica condições de fim

@@ -10,10 +10,6 @@ public abstract class Brick {
     protected Rectangle boundingBox;
     protected boolean collided = false;
 
-    // compatibility constructor (single-frame sprite)
-    public Brick(SpriteBatch batch, String spritePath) {
-        this(batch, spritePath, 2,1,0,0); // inicializa temporariamente em (0,0)
-    }
 
     // sprite-sheet aware constructor
     public Brick(SpriteBatch batch, String spritePath, int cols, int rows, int x, int y){
@@ -49,7 +45,6 @@ public abstract class Brick {
 
     // Cada tipo de brick implementa o comportamento da colisão
     public abstract void onCollision();
-
     // Pontos ganhos ao destruir este brick (por defeito 0)
     public int getPoints() { return 0; }
 }

@@ -13,7 +13,7 @@ public class Player {
     private Animator animator;
     private int posX, posY;
     private Rectangle boundingBox;
-    private int speed = 5;      // tornar inteiro para evitar problemas de cast
+    private int speed = 10;      // tornar inteiro para evitar problemas de cast
 
     private int width, height;  // dimensões fixas do sprite (frames)
     private SpriteBatch batch;
