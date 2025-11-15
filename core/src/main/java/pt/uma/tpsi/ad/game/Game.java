@@ -44,8 +44,7 @@ public class Game extends ApplicationAdapter {
         player.render();
         ball.render();
         // Atualiza bricks/explosões e processa colisões dentro do BrickGrid
-        float delta = Gdx.graphics.getDeltaTime();
-        brickGrid.update(delta, ball);
+        brickGrid.update(ball);
         // depois desenha a grelha atualizada
         brickGrid.render();
 

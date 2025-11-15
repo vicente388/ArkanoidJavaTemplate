@@ -12,7 +12,7 @@ public class Ball {
     private int directionX;
     private int directionY;
     private double angle;
-    private int speedX = 6; // aumenta para a bola ficar mais rápida horizontalmente
+    private int speedX = 6;
     private int speedY = 5;
 
 
@@ -81,11 +81,8 @@ public class Ball {
         boundingBox.setPosition(posX, posY);
     }
 
-    // Ajusta a direção horizontal dependendo do ponto de contacto no rect (paddle ou brick)
     public void adjustDirectionOnContact(Rectangle rect) {
-        // Simples reflexão: inverte apenas a componente Y da direção.
-        // Não alteramos a componente X (ou velocidade X) aqui — isto evita lógica de
-        // zonas esquerda/meio/direita da pá.
+
         reverseYDirection();
     }
 

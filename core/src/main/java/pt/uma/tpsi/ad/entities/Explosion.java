@@ -2,38 +2,45 @@ package pt.uma.tpsi.ad.entities;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import pt.uma.tpsi.ad.game.Animator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Explosion {
     private final int x, y;
     private final int width, height;
     private final Animator animator;
     private boolean remove = false;
-    private float elapsed = 0f;
-    private final float duration = 1f; // duração em segundos
 
-    // agora recebe largura/altura para desenhar no lugar do brick
+    private static final long DURATION_MS = 1000L; // 1 segundo
+    private final Timer timer;
+
     public Explosion(SpriteBatch batch, int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+
         this.animator = new Animator(batch, "explosion.png", 5, 1);
         animator.create();
-    }
 
-    public void update(float delta) {
-        elapsed += delta;
-        if (elapsed >= duration) {
-            remove = true;
-        }
+        // TimerTask simplificado com lambda
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                remove = true;
+            }
+        };
+
+        timer = new Timer("ExplosionTimer", true);
+        timer.schedule(task, DURATION_MS);
     }
 
     public void render() {
-        if (remove) return;
-        animator.render(x, y, width, height);
+        if (!remove) animator.render(x, y, width, height);
     }
 
     public boolean shouldRemove() {
         return remove;
     }
+
 }

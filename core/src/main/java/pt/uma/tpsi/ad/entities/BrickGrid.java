@@ -2,9 +2,9 @@ package pt.uma.tpsi.ad.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -15,15 +15,13 @@ public class BrickGrid {
     private final SpriteBatch batch;
     private final Player player;
 
-    private static final int ROWS = 4, COLS = 20;
+    private static final int ROWS = 5, COLS = 20;
 
     public BrickGrid(SpriteBatch batch, Player player) {
         this.batch = batch;
         this.player = player;
-        createBricks();
-    }
 
-    private void createBricks() {
+        // Criar a grelha de tijolos diretamente aqui (sem método separado)
         Random rng = new Random();
         int brickW = 32, brickH = 16, spacingX = 20, spacingY = 13;
         int totalWidth = COLS * (brickW + spacingX) - spacingX;
@@ -50,24 +48,29 @@ public class BrickGrid {
         }
     }
 
-    public void update(float delta, Ball ball) {
-        for (int i = bricks.size() - 1; i >= 0; i--) {
-            Brick brick = bricks.get(i);
-            if (brick.getBoundingBox().overlaps(ball.getBoundingBox())) {
-                brick.onCollision();
-                ball.reverseYDirection();
-                ball.resolveCollisionWith(brick.getBoundingBox());
+    // Atualiza usando apenas a bola; delta não é necessário aqui
+    public void update(Ball ball) {
 
-                if (brick.isCollided()) {
-                    explosions.add(new Explosion(batch, brick.posX, brick.posY,
+        // percorre a lista com Iterator e remove com iterator.remove() quando necessário
+        Iterator<Brick> iterator = bricks.iterator();
+        while (iterator.hasNext()) {
+            Brick brick = iterator.next();
+
+            // só processa colisão se a bounding box do brick e da bola se sobrepõem
+            if (!brick.getBoundingBox().overlaps(ball.getBoundingBox())) continue;
+
+            brick.onCollision();
+            ball.reverseYDirection();
+            ball.resolveCollisionWith(brick.getBoundingBox());
+
+            if (brick.isCollided()) {
+                explosions.add(new Explosion(batch, brick.posX, brick.posY,
                         (int) brick.getBoundingBox().width, (int) brick.getBoundingBox().height));
-                    if (player != null) player.addScore(brick.getPoints());
-                    bricks.remove(i);
-                }
+                if (player != null) player.addScore(brick.getPoints());
+                // remove o brick atual de forma segura durante iteração
+                iterator.remove();
             }
         }
-
-        explosions.forEach(e -> e.update(delta));
         explosions.removeIf(Explosion::shouldRemove);
     }
 
