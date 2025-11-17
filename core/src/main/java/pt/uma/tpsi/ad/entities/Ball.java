@@ -11,18 +11,15 @@ public class Ball {
     private Rectangle boundingBox;
     private int directionX;
     private int directionY;
-    private double angle;
-    private int speedX = 6;
-    private int speedY = 5;
-
+    private float speedX = 5;
+    private float speedY = 5;
+    private final float baseSpeedY = 3;
+    private boolean boosted = false;
 
     public Ball(SpriteBatch batch){
-
         animator = new Animator(batch, "ball.png", 2, 2);
         this.directionX =1;
         this.directionY =1;
-        this.angle =0.5;
-
     }
 
     public void create() {
@@ -30,27 +27,19 @@ public class Ball {
         posX = (Gdx.graphics.getWidth()/2) - this.animator.getWidth()/2;
         posY = (Gdx.graphics.getHeight()/2);
         boundingBox = new Rectangle(posX, posY, animator.getWidth(), animator.getHeight());
-
-
-
     }
 
     public void render(){
-
-        posY+=(directionY* speedY);
-        posX+=(speedX * directionX);
-
+        posY += (int)(directionY * speedY);
+        posX += (int)(speedX * directionX);
         if (posY > Gdx.graphics.getHeight() - animator.getHeight()) {
             directionY = -1;
         }
-
         if (posX > Gdx.graphics.getWidth() - animator.getWidth()) {
             directionX = -1;
         } else if (posX < 0) {
             directionX = 1;
         }
-
-
         boundingBox.setPosition(posX, posY);
         animator.render(posX,posY);
     }
@@ -62,28 +51,31 @@ public class Ball {
         return boundingBox;
     }
 
+    /** Reverse horizontal direction */
+    public void reverseXDirection() {
+        directionX *= -1;
+    }
+
+    /** Set position of the ball and update bounding box */
+    public void setPosition(int x, int y) {
+        this.posX = x;
+        this.posY = y;
+        if (this.boundingBox != null) this.boundingBox.setPosition(x, y);
+    }
+
     public void reverseYDirection() {
         directionY *= -1;
     }
 
-    // Empurra a bola para fora do rect fornecido para evitar deteção repetida de colisão
-    public void resolveCollisionWith(Rectangle rect) {
-        if (animator == null || boundingBox == null) return;
-        float ballCenterY = posY + animator.getHeight() / 2f;
-        float rectCenterY = rect.y + rect.height / 2f;
-        if (ballCenterY < rectCenterY) {
-            // bola estava abaixo do rect, posiciona-a abaixo
-            posY = (int) (rect.y - animator.getHeight() - 1);
-        } else {
-            // bola estava acima do rect, posiciona-a acima
-            posY = (int) (rect.y + rect.height + 1);
+    public void increaseSpeedY() {
+        if (!boosted) {
+            speedY = baseSpeedY + 3.5f;
+            boosted = true;
         }
-        boundingBox.setPosition(posX, posY);
     }
 
-    public void adjustDirectionOnContact(Rectangle rect) {
-
-        reverseYDirection();
+    public void resetSpeedY() {
+        speedY = baseSpeedY;
+        boosted = false;
     }
-
 }

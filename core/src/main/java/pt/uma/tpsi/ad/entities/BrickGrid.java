@@ -2,6 +2,7 @@ package pt.uma.tpsi.ad.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import pt.uma.tpsi.ad.game.Game;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,30 +11,47 @@ import java.util.Random;
 
 public class BrickGrid {
 
-    private final List<Brick> bricks = new ArrayList<>();
-    private final List<Explosion> explosions = new ArrayList<>();
+    private final List<Brick> bricks;
+    private final List<Explosion> explosions;
+    private final List<PowerUp> powerUps;
     private final SpriteBatch batch;
-    private final Player player;
+    private final Game game;
+    private int score = 0;
 
-    private static final int ROWS = 5, COLS = 20;
+    private static final int rows = 4;
+    private static final int cols = 20;
 
-    public BrickGrid(SpriteBatch batch, Player player) {
+    // layout constants (simple)
+    private static final int brickW = 32;
+    private static final int brickH = 16;
+    private static final int spacingX = 20;
+    private static final int spacingY = 13;
+    private static final int topOffset = 100;
+
+
+    public BrickGrid(SpriteBatch batch, Game game) {
         this.batch = batch;
-        this.player = player;
+        this.game = game;
+        this.bricks = new ArrayList<>();
+        this.explosions = new ArrayList<>();
+        this.powerUps = new ArrayList<>();
+        createBricks();
+    }
 
-        // Criar a grelha de tijolos diretamente aqui (sem método separado)
+    private void createBricks() {
         Random rng = new Random();
-        int brickW = 32, brickH = 16, spacingX = 20, spacingY = 13;
-        int totalWidth = COLS * (brickW + spacingX) - spacingX;
+
+        int totalWidth = cols * (brickW + spacingX) - spacingX;
         int startX = (Gdx.graphics.getWidth() - totalWidth) / 2;
-        int startY = Gdx.graphics.getHeight() - 100;
+        int startY = Gdx.graphics.getHeight() - topOffset;
 
+        bricks.clear();
 
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
                 Brick b;
                 float p = rng.nextFloat();
-                if (p < 0.5f) b = new NormalBrick(batch, 0, 0);
+                if (p < 0.6f) b = new NormalBrick(batch, 0, 0);
                 else if (p < 0.8f) b = new StrongBrick(batch, 0, 0);
 
                 else if (p < 0.9f) b = new IndestructibleBrick(batch, 0, 0);
@@ -48,38 +66,81 @@ public class BrickGrid {
         }
     }
 
-    // Atualiza usando apenas a bola; delta não é necessário aqui
-    public void update(Ball ball) {
-
-        // percorre a lista com Iterator e remove com iterator.remove() quando necessário
+    public void update(float delta, Ball ball, Player player) {
         Iterator<Brick> iterator = bricks.iterator();
         while (iterator.hasNext()) {
             Brick brick = iterator.next();
+            if (brick.getBoundingBox().overlaps(ball.getBoundingBox())) {
+                brick.onCollision();
+                ball.reverseYDirection();
 
-            // só processa colisão se a bounding box do brick e da bola se sobrepõem
-            if (!brick.getBoundingBox().overlaps(ball.getBoundingBox())) continue;
+                if (brick.isCollided()) {
+                    score += brick.getPoints();
 
-            brick.onCollision();
-            ball.reverseYDirection();
-            ball.resolveCollisionWith(brick.getBoundingBox());
+                    int explosionX = brick.getPosX();
+                    int explosionY = brick.getPosY();
+                    int w = (int) brick.getBoundingBox().width;
+                    int h = (int) brick.getBoundingBox().height;
+                    explosions.add(new Explosion(batch, explosionX, explosionY, w, h));
 
-            if (brick.isCollided()) {
-                explosions.add(new Explosion(batch, brick.posX, brick.posY,
-                        (int) brick.getBoundingBox().width, (int) brick.getBoundingBox().height));
-                if (player != null) player.addScore(brick.getPoints());
-                // remove o brick atual de forma segura durante iteração
-                iterator.remove();
+                    if (brick instanceof PowerUpBrick) {
+                        PowerUp.Type[] vals = PowerUp.Type.values();
+                        PowerUp.Type t = vals[new Random().nextInt(vals.length)];
+                        PowerUp pu = new PowerUp(batch, brick.getPosX(), brick.getPosY(), t);
+                        powerUps.add(pu);
+                    }
+
+                    iterator.remove();
+                }
+
+                break;
             }
         }
-        explosions.removeIf(Explosion::shouldRemove);
+
+
+
+        // atualizar powerUps
+        Iterator<PowerUp> pIt = powerUps.iterator();
+        while (pIt.hasNext()) {
+            PowerUp pu = pIt.next();
+            pu.update(delta);
+
+            if (pu.getBoundingBox().overlaps(player.getBoundingBox())) {
+                pu.activate(ball, player, 5000L); // 5 segundos
+                if (game != null) {
+                    System.out.println("PowerUp collected: " + pu.getType());
+                    game.onPowerUpCollected(pu.getType());
+                }
+                pIt.remove();
+            } else if (pu.shouldRemove()) {
+                pIt.remove();
+            }
+        }
     }
 
     public void render() {
-        bricks.stream().filter(b -> !b.isCollided()).forEach(Brick::render);
-        explosions.forEach(Explosion::render);
+        for (Brick brick : bricks) {
+            if (!brick.isCollided()) {
+                brick.render();
+            }
+        }
+
+        for (Explosion e : explosions) {
+            e.render();
+        }
+
+        for (PowerUp pu : powerUps) {
+            pu.render();
+        }
     }
 
+    public int getScore() { return score; }
     public boolean isCleared() {
-        return bricks.stream().noneMatch(b -> !(b instanceof IndestructibleBrick) && !b.isCollided());
+        for (Brick b : bricks) {
+            if (!(b instanceof IndestructibleBrick)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

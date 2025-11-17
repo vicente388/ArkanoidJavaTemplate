@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import pt.uma.tpsi.ad.entities.Ball;
 import pt.uma.tpsi.ad.entities.BrickGrid;
 import pt.uma.tpsi.ad.entities.Player;
+import pt.uma.tpsi.ad.entities.PowerUp;
 
 public class Game extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -16,13 +17,15 @@ public class Game extends ApplicationAdapter {
     private Ball ball;
     private BrickGrid brickGrid;
 
-    private boolean gameOver = false; // controla o fim do jogo
-    private boolean victory = false; // controla vitória
+    private boolean gameOver = false;
 
+    private String powerUpMessage = null;
+    private float powerUpTimeLeft = 0f;
 
     @Override
     public void create() {
         Gdx.graphics.setWindowedMode(1280, 720);
+        Gdx.graphics.setForegroundFPS(60);
         batch = new SpriteBatch();
 
         backgroundManagement = new BackgroundManagement(batch);
@@ -31,9 +34,8 @@ public class Game extends ApplicationAdapter {
 
         ball = new Ball(batch);
         ball.create();
-        brickGrid = new BrickGrid(batch, player);
+        brickGrid = new BrickGrid(batch, this);
 
-        // 🔹 Usa a fonte padrão do LibGDX — sem precisar de ficheiros externos
         font = new BitmapFont();
     }
 
@@ -43,41 +45,47 @@ public class Game extends ApplicationAdapter {
         backgroundManagement.render();
         player.render();
         ball.render();
-        // Atualiza bricks/explosões e processa colisões dentro do BrickGrid
-        brickGrid.update(ball);
-        // depois desenha a grelha atualizada
+        float delta = Gdx.graphics.getDeltaTime();
+        brickGrid.update(delta, ball, player);
         brickGrid.render();
 
         if (ball.getBoundingBox().overlaps(player.getBoundingBox())) {
-            // comportamento simples: a bola reflete verticalmente sem lógica de zonas
-            ball.adjustDirectionOnContact(player.getBoundingBox());
-            // empurra a bola para fora do paddle para evitar múltiplas deteções seguidas
-            ball.resolveCollisionWith(player.getBoundingBox());
+            ball.reverseYDirection();
         }
 
-        // Se o jogo ainda não acabou, verifica condições de fim
         if (!gameOver) {
-            if (ball.posY() < 0) { // se a bola sair por baixo do ecrã
+            if (ball.posY() < 0) {
                 gameOver = true;
-                victory = false;
-            } else if (brickGrid.isCleared()) { // vitória
-                gameOver = true;
-                victory = true;
             }
         }
 
-        // Se o jogo acabou, mostra texto apropriado (vitória ou derrota)
         if (gameOver) {
-            font.getData().setScale(3); // aumenta o tamanho do texto
-            if (victory) {
-                font.draw(batch, "YOU WIN!",
-                    Gdx.graphics.getWidth() / 2f - 150,
-                    Gdx.graphics.getHeight() / 2f);
-            } else {
-                font.draw(batch, "GAME OVER",
-                    Gdx.graphics.getWidth() / 2f - 150,
-                    Gdx.graphics.getHeight() / 2f);
-            }
+            font.getData().setScale(2);
+            font.draw(batch, "GAME OVER",
+                Gdx.graphics.getWidth() / 2f - 150,
+                Gdx.graphics.getHeight() / 2f);
+        }
+
+        if (brickGrid.isCleared() && !gameOver) {
+            font.getData().setScale(3);
+            font.draw(batch, "YOU WIN",
+                Gdx.graphics.getWidth() / 2f - 130,
+                Gdx.graphics.getHeight() / 2f + 60);
+        }
+
+        font.getData().setScale(1.2f);
+        font.draw(batch, "Score: " + brickGrid.getScore(), 10, Gdx.graphics.getHeight() - 10);
+
+        if (powerUpTimeLeft > 0f) {
+            powerUpTimeLeft -= delta;
+            if (powerUpTimeLeft < 0f) powerUpTimeLeft = 0f;
+            int secs = (int) Math.ceil(powerUpTimeLeft);
+            if (powerUpMessage == null) powerUpMessage = "Power-up";
+            font.getData().setScale(2f);
+            font.draw(batch,
+                powerUpMessage + " - " + secs + "s",
+                Gdx.graphics.getWidth() / 2f - 200,
+                Gdx.graphics.getHeight() - 50);
         }
 
         batch.end();
@@ -87,6 +95,15 @@ public class Game extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         font.dispose();
-        if (player != null) player.dispose();
+    }
+
+    public void onPowerUpCollected(PowerUp.Type type) {
+        if (type == PowerUp.Type.FAST_BALL) {
+            powerUpMessage = "Ball speed up";
+        } else {
+            powerUpMessage = "Paddle speed up";
+        }
+        powerUpTimeLeft = 5f;
+        System.out.println("Game: onPowerUpCollected -> " + powerUpMessage + " for 5s");
     }
 }

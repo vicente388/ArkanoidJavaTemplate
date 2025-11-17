@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/core/src/main/java/pt/uma/tpsi/ad/game/BackgroundManagement.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/core/src/main/java/pt/uma/tpsi/ad/game/BackgroundManagement.java" />
+              <option name="originalContent" value="package pt.uma.tpsi.ad.game;&#10;&#10;import com.badlogic.gdx.graphics.Texture;&#10;import com.badlogic.gdx.graphics.g2d.Sprite;&#10;import com.badlogic.gdx.graphics.g2d.SpriteBatch;&#10;&#10;public class BackgroundManagement {&#10;&#10;    private Texture background;&#10;    private Sprite sprite;&#10;    SpriteBatch spriteBatch;&#10;&#10;    public BackgroundManagement(SpriteBatch batch) {&#10;        this.spriteBatch = batch;&#10;        background = new Texture(&quot;bg.png&quot;);&#10;        sprite = new Sprite(background);&#10;        sprite.setPosition(0, 0);&#10;    }&#10;&#10;    public void render() {&#10;        sprite.draw(spriteBatch);&#10;    }&#10;}&#10;" />
+              <option name="updatedContent" value="package pt.uma.tpsi.ad.game;&#10;&#10;import com.badlogic.gdx.graphics.Texture;&#10;import com.badlogic.gdx.graphics.g2d.Sprite;&#10;import com.badlogic.gdx.graphics.g2d.SpriteBatch;&#10;&#10;public class BackgroundManagement {&#10;&#10;    private Texture background;&#10;    private Sprite sprite;&#10;    SpriteBatch spriteBatch;&#10;&#10;    public BackgroundManagement(SpriteBatch batch) {&#10;        this.spriteBatch = batch;&#10;        background = new Texture(&quot;bg.png&quot;);&#10;        sprite = new Sprite(background);&#10;        sprite.setPosition(0, 0);&#10;    }&#10;&#10;    public void render() {&#10;        sprite.draw(spriteBatch);&#10;    }&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

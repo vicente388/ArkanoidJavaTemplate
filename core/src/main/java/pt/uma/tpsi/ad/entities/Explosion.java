@@ -11,8 +11,7 @@ public class Explosion {
     private final Animator animator;
     private boolean remove = false;
 
-    private static final long DURATION_MS = 1000L; // 1 segundo
-    private final Timer timer;
+    private static final long durationMs = 1000L;
 
     public Explosion(SpriteBatch batch, int x, int y, int width, int height) {
         this.x = x;
@@ -23,16 +22,14 @@ public class Explosion {
         this.animator = new Animator(batch, "explosion.png", 5, 1);
         animator.create();
 
-        // TimerTask simplificado com lambda
         TimerTask task = new TimerTask() {
-            @Override
             public void run() {
                 remove = true;
             }
         };
 
-        timer = new Timer("ExplosionTimer", true);
-        timer.schedule(task, DURATION_MS);
+        Timer timer = new Timer("ExplosionTimer", true);
+        timer.schedule(task, durationMs);
     }
 
     public void render() {
@@ -42,5 +39,4 @@ public class Explosion {
     public boolean shouldRemove() {
         return remove;
     }
-
 }
